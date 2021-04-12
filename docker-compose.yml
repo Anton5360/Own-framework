@@ -1,0 +1,31 @@
+version: '3'
+services:
+  app:
+    build: ./docker/php
+    container_name: own_framework_app
+    volumes:
+      - ./:/var/www
+    depends_on:
+      - db
+  nginx:
+    image: nginx:1.17
+    container_name: own_framework_nginx
+    ports:
+      - 8080:80
+    volumes:
+      - ./:/var/www
+      - ./docker/nginx/own-framework.com.conf:/etc/nginx/conf.d/own-framework.com.conf
+    depends_on:
+      - app
+  db:
+    image: mysql
+    ports:
+      - 3306:3306
+    container_name: own_framework_mysql
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    environment:
+      MYSQL_DATABASE: own_framework_db
+      MYSQL_USER: own_framework_user
+      MYSQL_PASSWORD: own_framework_pwd
+      MYSQL_ALLOW_EMPTY_PASSWORD: 1
