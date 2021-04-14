@@ -12,6 +12,7 @@ class App
     private array $config;
 
     static public ?App $app = null;
+    public ?Database $db = null;
     
     private function __construct(array $config)
     {
@@ -43,17 +44,38 @@ class App
         return self::$app;
     }
 
+    public function db(): Database
+    {
+        return $this->db;
+    }
+
+
     private function run(): void
     {
 
         $this
             ->initConfigHelper()
+            ->initDB()
             ->initRouter();
     }
     
     private function initRouter(): self
     {
         (new Router($_SERVER['REQUEST_URI']));
+        return $this;
+    }
+
+    private function initDB(): self
+    {
+        $host = ConfigHelper::getConfigValue('components.db.host');
+        $name = ConfigHelper::getConfigValue('components.db.name');
+        $user = ConfigHelper::getConfigValue('components.db.user');
+        $password = ConfigHelper::getConfigValue('components.db.password');
+
+        $this->db = new Database($host, $name, $user, $password);
+        if(!$this->db){
+            throw new Exception('Database connection has not been established');
+        }
         return $this;
     }
 
