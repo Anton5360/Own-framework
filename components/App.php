@@ -13,6 +13,7 @@ class App
 
     static public ?App $app = null;
     public ?Database $db = null;
+    public ?Template $template = null;
     
     private function __construct(array $config)
     {
@@ -20,7 +21,6 @@ class App
             throw new Exception('Config are required');
         }
         $this->config = $config;
-        $this->run();
     }
 
     private function __clone(){}
@@ -31,8 +31,9 @@ class App
         if(self::$app){
             throw new Exception('App has already been initiated ');
         }
-        
+
         self::$app = new self($config);
+        self::$app->run();
     }
     
     static public function get(): App
@@ -49,13 +50,19 @@ class App
         return $this->db;
     }
 
+    public function template(): Template
+    {
+        return $this->template;
+    }
+
 
     private function run(): void
     {
-
+//        var_dump(App::$app);exit;
         $this
             ->initConfigHelper()
             ->initDB()
+            ->initTemplate()
             ->initRouter();
     }
     
@@ -75,6 +82,17 @@ class App
         $this->db = new Database($host, $name, $user, $password);
         if(!$this->db){
             throw new Exception('Database connection has not been established');
+        }
+        return $this;
+    }
+
+    private function initTemplate(): self
+    {
+        $viewsDir = ConfigHelper::getConfigValue('components.views.baseDir');
+        $templatesDir = ConfigHelper::getConfigValue('components.template.baseDir');
+        $this->template = new Template($viewsDir, $templatesDir);
+        if(!$this->template){
+            throw new Exception('Template component crashed');
         }
         return $this;
     }
