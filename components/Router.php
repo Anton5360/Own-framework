@@ -34,6 +34,11 @@ class Router
 
         $content = $controller->{$action}(...$processedParams);
 
+        if(!$content || !is_string($content)){
+            throw new Exception('Something was wrong');
+        }
+
+        echo $content;
     }
 
 
